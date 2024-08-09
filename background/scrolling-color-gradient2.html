@@ -65,23 +65,7 @@
         window.addEventListener('mousewheel', handleScroll, { passive: false });
         window.addEventListener('DOMMouseScroll', handleScroll, { passive: false });
 
-        // 觸摸設備支持
-        let touchStartY = 0;
-        window.addEventListener('touchstart', function(e) {
-            touchStartY = e.touches[0].clientY;
-        }, { passive: false });
-
-        window.addEventListener('touchmove', function(e) {
-            e.preventDefault();
-            const touchEndY = e.touches[0].clientY;
-            const deltaY = touchEndY - touchStartY;
-            
-            scrollPercentage -= deltaY * scrollSpeed * 0.1;
-            scrollPercentage = Math.max(0, Math.min(1, scrollPercentage));
-            
-            updateBackgroundColor();
-            touchStartY = touchEndY;
-        }, { passive: false });
+        
 
         updateBackgroundColor(); // 初始化顏色
     </script>
