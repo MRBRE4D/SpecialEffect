@@ -266,7 +266,7 @@
 
                 velocityY = (lastTouchY - touchEndY) / deltaTime;
 
-                scrollProgress += deltaY * 0.0001;
+                scrollProgress += deltaY * 0.00005;
                 scrollProgress = Math.max(0, Math.min(1, scrollProgress));
 
                 currentSpeed = baseSpeed + Math.abs(deltaY) / 50;
