@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>滑鼠移動顏色變化演示</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        .content {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div>移動滑鼠來改變背景顏色<br>從左到右：藍色到橙色<br>從上到下：淡到深</div>
+    </div>
+
+    <script>
+        function lerp(start, end, t) {
+            return start * (1 - t) + end * t;
+        }
+
+        function updateBackgroundColor(event) {
+            const xPercentage = event.clientX / window.innerWidth;
+            const yPercentage = event.clientY / window.innerHeight;
+
+            const startColor = {r: 65, g: 105, b: 225}; // 皇家藍
+            const endColor = {r: 255, g: 165, b: 0};   // 橙色
+
+            const r = Math.round(lerp(startColor.r, endColor.r, xPercentage));
+            const g = Math.round(lerp(startColor.g, endColor.g, xPercentage));
+            const b = Math.round(lerp(startColor.b, endColor.b, xPercentage));
+
+            // 使用 yPercentage 來調整顏色的亮度
+            const brightness = lerp(1, 0.3, yPercentage);
+            
+            document.body.style.backgroundColor = `rgb(${r * brightness}, ${g * brightness}, ${b * brightness})`;
+        }
+
+        document.addEventListener('mousemove', updateBackgroundColor);
+
+        // 初始化顏色
+        updateBackgroundColor({clientX: 0, clientY: 0});
+    </script>
+</body>
+</html>

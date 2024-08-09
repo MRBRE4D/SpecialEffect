@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模擬滾動顏色變化演示</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        .content {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div>使用滾輪或觸控板滾動來改變背景顏色</div>
+    </div>
+
+    <script>
+        let scrollPercentage = 0;
+        const scrollSpeed = 0.05; // 調整這個值來改變滾動速度
+
+        function lerp(start, end, t) {
+            return start * (1 - t) + end * t;
+        }
+
+        function updateBackgroundColor() {
+            const startColor = {r: 65, g: 105, b: 225}; // 皇家藍
+            const endColor = {r: 255, g: 165, b: 0};   // 橙色
+
+            const r = Math.round(lerp(startColor.r, endColor.r, scrollPercentage));
+            const g = Math.round(lerp(startColor.g, endColor.g, scrollPercentage));
+            const b = Math.round(lerp(startColor.b, endColor.b, scrollPercentage));
+
+            document.body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function handleScroll(event) {
+            event.preventDefault();
+            
+            // 使用 deltaY 來確定滾動方向和強度
+            scrollPercentage += (event.deltaY > 0 ? 1 : -1) * scrollSpeed;
+            
+            // 確保百分比在 0 到 1 之間
+            scrollPercentage = Math.max(0, Math.min(1, scrollPercentage));
+            
+            updateBackgroundColor();
+        }
+
+        // 為各種可能的滾動事件添加監聽器
+        window.addEventListener('wheel', handleScroll, { passive: false });
+        window.addEventListener('mousewheel', handleScroll, { passive: false });
+        window.addEventListener('DOMMouseScroll', handleScroll, { passive: false });
+
+        // 觸摸設備支持
+        let touchStartY = 0;
+        window.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: false });
+
+        window.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            const touchEndY = e.touches[0].clientY;
+            const deltaY = touchEndY - touchStartY;
+            
+            scrollPercentage -= deltaY * scrollSpeed * 0.1;
+            scrollPercentage = Math.max(0, Math.min(1, scrollPercentage));
+            
+            updateBackgroundColor();
+            touchStartY = touchEndY;
+        }, { passive: false });
+
+        updateBackgroundColor(); // 初始化顏色
+    </script>
+</body>
+</html>

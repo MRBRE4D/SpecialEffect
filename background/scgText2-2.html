@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>節點顏色切換與重複滾動文字</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        #gradient-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.5s ease;
+            position: relative;
+        }
+        #progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-color: rgba(255,255,255,0.3);
+        }
+        #progress {
+            height: 100%;
+            width: 0;
+            background-color: white;
+            transition: width 0.3s ease;
+        }
+        .node {
+            position: absolute;
+            bottom: 0;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+        #color-block {
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            transition: background-color 0.5s ease;
+            position: relative;
+            z-index: 2;
+        }
+        #text-container {
+            position: absolute;
+            width: 100%;
+            height: 50px;
+            overflow: hidden;
+            bottom: 30%;
+            z-index: 1;
+        }
+        #moving-text {
+            position: absolute;
+            white-space: nowrap;
+            font-size: 2em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            transition: left 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+    <div id="gradient-container">
+        <div id="color-block"></div>
+        <div id="text-container">
+            <div id="moving-text"></div>
+        </div>
+    </div>
+    <div id="progress-bar">
+        <div id="progress"></div>
+    </div>
+
+    <script>
+        const colors = ['#1A1A1D', '#E0E5EC', '#F0E6D2', '#E6F3F5', '#D4E5D2'];
+        const brightColors = ['#3A3A3D', '#C0C5CC', '#D0C6B2', '#C6D3D5', '#B4C5B2'];
+        const texts = ['京華堂：傳統與創新的完美融合', '風：科技與自然的和諧共存', '金：奢華品味的極致體現', '水：純淨透明的生活態度', '土：回歸自然的生活哲學'];
+        let currentIndex = 0;
+        const container = document.getElementById('gradient-container');
+        const progress = document.getElementById('progress');
+        const colorBlock = document.getElementById('color-block');
+        const movingText = document.getElementById('moving-text');
+
+        let textPosition = window.innerWidth;
+        let isScrolling = false;
+        let scrollTimeout;
+        let animationSpeed = 2;
+
+        function updateColor(targetIndex) {
+            container.style.backgroundColor = colors[targetIndex];
+            colorBlock.style.backgroundColor = brightColors[targetIndex];
+        }
+
+        function updateProgress() {
+            progress.style.width = `${(currentIndex / (colors.length - 1)) * 100}%`;
+        }
+
+        function updateText() {
+            const repeatedText = (texts[currentIndex] + '　　　').repeat(10);
+            movingText.textContent = repeatedText;
+            textPosition = 0;
+            movingText.style.left = `${textPosition}px`;
+        }
+
+        function moveText() {
+            textPosition -= animationSpeed;
+            if (textPosition < -movingText.offsetWidth / 2) {
+                textPosition = 0;
+            }
+            movingText.style.left = `${textPosition}px`;
+            requestAnimationFrame(moveText);
+        }
+
+        function handleScroll(event) {
+            event.preventDefault();
+            const delta = event.deltaY || event.detail || -event.wheelDelta;
+            
+            isScrolling = true;
+            animationSpeed = 10;
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                isScrolling = false;
+                animationSpeed = 2;
+            }, 150);
+
+            if ((delta > 0 && currentIndex < colors.length - 1) || 
+                (delta < 0 && currentIndex > 0)) {
+                currentIndex += delta > 0 ? 1 : -1;
+                updateColor(currentIndex);
+                updateProgress();
+                updateText();
+            }
+        }
+
+        window.addEventListener('wheel', handleScroll, { passive: false });
+        window.addEventListener('mousewheel', handleScroll, { passive: false });
+        window.addEventListener('DOMMouseScroll', handleScroll, { passive: false });
+
+        // 添加節點到進度條
+        colors.forEach((_, index) => {
+            const node = document.createElement('div');
+            node.className = 'node';
+            node.style.left = `${index / (colors.length - 1) * 100}%`;
+            document.getElementById('progress-bar').appendChild(node);
+        });
+
+        // 初始化
+        updateColor(currentIndex);
+        updateProgress();
+        updateText();
+        moveText();
+    </script>
+</body>
+</html>
