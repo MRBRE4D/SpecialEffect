@@ -214,7 +214,7 @@
                 event.preventDefault();
                 const delta = event.deltaY || event.detail || -event.wheelDelta;
 
-                velocityY = delta * 0.00001;
+                velocityY = delta * 0.0005;
                 scrollProgress += velocityY;
 
                 // scrollProgress += delta > 0 ? 0.01 : -0.01; 
@@ -266,7 +266,7 @@
 
                 velocityY = (lastTouchY - touchEndY) / deltaTime;
 
-                scrollProgress += deltaY * 0.001;
+                scrollProgress += deltaY * 0.0001;
                 scrollProgress = Math.max(0, Math.min(1, scrollProgress));
 
                 currentSpeed = baseSpeed + Math.abs(deltaY) / 50;
