@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>滾動與連續跑馬燈效果（調整版）</title>
+        <style>
+            body,
+            html {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                overflow: hidden;
+            }
+            #gradient-container {
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: background-color 0.5s ease;
+                perspective: 1000px;
+            }
+            #progress-bar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 10px;
+                background-color: rgba(255, 255, 255, 0.3);
+            }
+            #progress {
+                height: 100%;
+                width: 0;
+                background-color: white;
+                transition: width 0.1s linear;
+            }
+            .node {
+                position: absolute;
+                bottom: 0;
+                width: 10px;
+                height: 10px;
+                background-color: white;
+                border-radius: 50%;
+                transform: translateX(-50%);
+            }
+            #color-block {
+                width: 80vw;
+                max-width: 300px;
+                height: 30vh;
+                max-height: 200px;
+                border-radius: 15px;
+                transition: background-color 0.5s ease;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 15vmin;
+                flex-wrap: nowrap;
+                color: white;
+                opacity: 0.8;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+                position: relative;
+                z-index: 2;
+                transform: translateZ(50px);
+            }
+            #text-container {
+                width: 100%;
+                height: 15vh;
+                overflow: hidden;
+                position: absolute;
+                top: 45%;
+                z-index: 1;
+            }
+            #moving-text {
+                white-space: nowrap;
+                font-size: 10vmin;
+                color: white;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+                display: inline-block;
+            }
+
+            @media (max-width: 768px) {
+                #color-block {
+                    width: 90vw;
+                    height: 25vh;
+                    font-size: 20vmin;
+                }
+                #text-container {
+                    height: 12vh;
+                }
+                #moving-text {
+                    font-size: 8vmin;
+                }
+            }
+
+            @media (max-width: 480px) {
+                #color-block {
+                    width: 95vw;
+                    height: 20vh;
+                    font-size: 18vmin;
+                }
+                #text-container {
+                    height: 10vh;
+                }
+                #moving-text {
+                    font-size: 15vmin;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="gradient-container">
+            <div id="color-block"></div>
+            <div id="text-container">
+                <div id="moving-text"></div>
+            </div>
+        </div>
+        <div id="progress-bar">
+            <div id="progress"></div>
+        </div>
+
+        <script>
+            const colors = ["#1A1A1D", "#E0E5EC", "#F0E6D2", "#E6F3F5", "#D4E5D2"];
+            const brightColors = ["#3A3A3D", "#C0C5CC", "#D0C6B2", "#C6D3D5", "#B4C5B2"];
+            const nodeNames = ["京華堂", "風", "金", "水", "土"];
+            const texts = ["傳統與創新的完美融合", "科技與自然的和諧共存", "奢華品味的極致體現", "純淨透明的生活態度", "回歸自然的生活哲學"];
+
+            const nodeCount = nodeNames.length;
+            const nodePositions = Array.from({length: nodeCount}, (_, i) => (i + 1) / (nodeCount + 1));
+            <!-- const nodePositions = [0.2, 0.32, 0.45, 0.68, 0.8]; -->
+
+            let scrollProgress = 0;
+            let currentNodeIndex = 0;
+            const container = document.getElementById("gradient-container");
+            const progress = document.getElementById("progress");
+            const colorBlock = document.getElementById("color-block");
+            const movingText = document.getElementById("moving-text");
+            const textContainer = document.getElementById("text-container");
+
+            let baseSpeed = 0.5;
+            let currentSpeed = baseSpeed;
+            let lastScrollTime = 0;
+
+            function initialize() {
+                scrollProgress = 0;
+                currentNodeIndex = 0;
+                updateColor();
+                updateProgress();
+                updateText();
+                moveText();
+            
+                // 強制立即更新 DOM
+                container.offsetHeight;
+                
+                // 確保初始狀態正確
+                container.style.backgroundColor = colors[0];
+                colorBlock.style.backgroundColor = brightColors[0];
+                colorBlock.textContent = nodeNames[0];
+            }
+
+            function updateColor() {
+                let newIndex;
+                if (scrollProgress <= nodePositions[0]) {
+                    newIndex = 0;
+                } else if (scrollProgress > nodePositions[nodePositions.length - 1]) {
+                    newIndex = nodePositions.length - 1;
+                } else {
+                    newIndex = nodePositions.findIndex(pos => scrollProgress <= pos) - 1;
+                }
+            
+                if (newIndex !== currentNodeIndex) {
+                    currentNodeIndex = newIndex;
+                    container.style.backgroundColor = colors[currentNodeIndex];
+                    colorBlock.style.backgroundColor = brightColors[currentNodeIndex];
+                    colorBlock.textContent = nodeNames[currentNodeIndex];
+                    updateText();
+                }
+            }
+
+            function updateProgress() {
+                progress.style.width = `${scrollProgress * 100}%`;
+            }
+
+            function updateText() {
+                const repeatedText = (texts[currentNodeIndex] + "　　　").repeat(20);
+                movingText.textContent = repeatedText;
+            }
+
+            function moveText() {
+                const textWidth = movingText.offsetWidth;
+                const containerWidth = textContainer.offsetWidth;
+
+                if (!movingText.style.transform) {
+                    movingText.style.transform = "translateX(0px)";
+                }
+
+                let currentPosition = parseFloat(movingText.style.transform.replace("translateX(", "").replace("px)", ""));
+                currentPosition -= currentSpeed;
+
+                if (currentPosition <= -textWidth / 2) {
+                    currentPosition += textWidth / 2;
+                }
+
+                movingText.style.transform = `translateX(${currentPosition}px)`;
+
+                if (currentSpeed > baseSpeed) {
+                    currentSpeed = Math.max(baseSpeed, currentSpeed * 0.99);
+                }
+
+                requestAnimationFrame(moveText);
+            }
+
+            function handleScroll(event) {
+                event.preventDefault();
+                const delta = event.deltaY || event.detail || -event.wheelDelta;
+
+                velocityY = delta * 0.0005;
+                scrollProgress += velocityY;
+
+                // scrollProgress += delta > 0 ? 0.01 : -0.01; 
+
+                scrollProgress = Math.max(0, Math.min(1, scrollProgress));
+
+                currentSpeed = baseSpeed + Math.abs(delta) / 20;
+                lastScrollTime = Date.now();
+
+                updateColor();
+                updateProgress();
+
+                if (!isInertiaScrolling) {
+                    isInertiaScrolling = true;
+                    requestAnimationFrame(inertiaScroll);
+                }
+            }
+
+            // 添加節點到進度條
+            nodePositions.forEach((pos) => {
+                const node = document.createElement("div");
+                node.className = "node";
+                node.style.left = `${pos * 100}%`;
+                document.getElementById("progress-bar").appendChild(node);
+            });
+
+            // 觸摸設備支持
+            let touchStartY = 0;
+            let touchEndY = 0;
+            let lastTouchY = 0;
+            let lastTouchTime = 0;
+            let velocityY = 0;
+            let isInertiaScrolling = false;
+
+            function handleTouchStart(event) {
+                touchStartY = event.touches[0].clientY;
+                lastTouchY = touchStartY;
+                lastTouchTime = Date.now();
+                velocityY = 0;
+                isInertiaScrolling = false;
+            }
+
+            function handleTouchMove(event) {
+                event.preventDefault();
+                touchEndY = event.touches[0].clientY;
+                const deltaY = touchStartY - touchEndY;
+                const currentTime = Date.now();
+                const deltaTime = currentTime - lastTouchTime;
+
+                velocityY = (lastTouchY - touchEndY) / deltaTime;
+
+                scrollProgress += deltaY * 0.00005;
+                scrollProgress = Math.max(0, Math.min(1, scrollProgress));
+
+                currentSpeed = baseSpeed + Math.abs(deltaY) / 50;
+                lastScrollTime = currentTime;
+
+                updateColor();
+                updateProgress();
+
+                lastTouchY = touchEndY;
+                lastTouchTime = currentTime;
+            }
+
+            function handleTouchEnd(event) {
+                isInertiaScrolling = true;
+                requestAnimationFrame(inertiaScroll);
+            }
+
+            function inertiaScroll() {
+                if (!isInertiaScrolling) return;
+
+                velocityY *= 0.95; // 減速因子
+                scrollProgress += velocityY * 0.01;
+                scrollProgress = Math.max(0, Math.min(1, scrollProgress));
+
+                updateColor();
+                updateProgress();
+
+                if (Math.abs(velocityY) > 0.01) {
+                    requestAnimationFrame(inertiaScroll);
+                } else {
+                    isInertiaScrolling = false;
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", initialize);
+            // 添加觸摸事件監聽器
+            document.addEventListener("touchstart", handleTouchStart, {passive: false});
+            document.addEventListener("touchmove", handleTouchMove, {passive: false});
+            document.addEventListener("touchend", handleTouchEnd, {passive: false});
+
+            // 保持原有的滾輪事件監聽器
+            window.addEventListener("wheel", handleScroll, {passive: false});
+            window.addEventListener("mousewheel", handleScroll, {passive: false});
+            window.addEventListener("DOMMouseScroll", handleScroll, {passive: false});
+
+            // 初始化
+            updateColor();
+            updateProgress();
+            updateText();
+            moveText();
+        </script>
+    </body>
+</html>

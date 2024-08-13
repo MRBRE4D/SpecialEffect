@@ -63,7 +63,7 @@
         }
 
         .wind-section {
-            background: linear-gradient(225deg, #c4c4c4, #f3e8d9, #e0fff8, #f9ffe4, #edfff2);
+            background: linear-gradient(225deg, #ffabab, #ffdaab, #ddffab, #abe4ff, #d9abff);
             background-size: 300% 300%;
             animation: Rainbow 25s ease infinite;
         }
@@ -80,7 +80,6 @@
             top: 60%;
             transform: translate(-50%, -50%);
             z-index: 10;
-            pointer-events: none;
         }
 
         .text-content {
@@ -91,8 +90,6 @@
             text-align: center;
             color: #ffffff;
             z-index: 20;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            will-change: transform;
         }
 
         .text-content h1 {
@@ -111,25 +108,6 @@
             opacity: 0;
             transform: translateY(20px);
             animation: fadeInUp 1s forwards 0.5s;
-        }
-
-        .parallax-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            will-change: transform;
-        }
-
-        .wind-bg {
-            background-image: url('https://source.unsplash.com/random/1600x900?nature,wind');
-        }
-
-        .gold-bg {
-            background-image: url('https://source.unsplash.com/random/1600x900?gold,luxury');
         }
 
         @keyframes Rainbow {
@@ -173,7 +151,6 @@
     <!-- 主要內容區 -->
     <main class="main-content">
         <section class="wind-section">
-            <div class="parallax-bg wind-bg"></div>
             <canvas id="pyramidCanvas"></canvas>
             <div class="text-content">
                 <h1>美容革命</h1>
@@ -181,7 +158,6 @@
             </div>
         </section>
         <section class="gold-section">
-            <div class="parallax-bg gold-bg"></div>
             <div class="text-content">
                 <h1>打破上限</h1>
                 <h2>讓自己美的張揚</h2>
@@ -200,20 +176,22 @@
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('pyramidCanvas'), alpha: true });
-            renderer.setSize(600, 600);
+            renderer.setSize(600, 600);  // 增加尺寸到原來的三倍
 
-            const geometry = new THREE.ConeGeometry(3, 6, 4);
+            const geometry = new THREE.ConeGeometry(3, 6, 4);  // 增加尺寸到原來的三倍
             const material = new THREE.MeshPhongMaterial({
-                color: 0xFFFAFA,
+                color: 0xFFFAFA,  // 乳白色
                 shininess: 100,
                 specular: 0x444444
             });
             pyramid = new THREE.Mesh(geometry, material);
             scene.add(pyramid);
 
+            // 添加環境光
             const ambientLight = new THREE.AmbientLight(0x404040);
             scene.add(ambientLight);
 
+            // 添加定向光源以創造陰影效果
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
             directionalLight.position.set(5, 5, 5);
             scene.add(directionalLight);
@@ -229,40 +207,48 @@
 
         // 處理滾動效果
         function handleScroll() {
-            const scrollY = window.pageYOffset;
+            const scrollY = window.scrollY;
             const windSection = document.querySelector('.wind-section');
             const goldSection = document.querySelector('.gold-section');
             const textContents = document.querySelectorAll('.text-content');
-            const parallaxBgs = document.querySelectorAll('.parallax-bg');
 
-            // 視差背景
-            parallaxBgs.forEach((bg, index) => {
-                bg.style.transform = `translateY(${scrollY * 0.5}px)`;
-            });
+            // 調整背景移動速度，使其比文字移動慢
+            windSection.style.transform = `translateY(-${scrollY * 0.3}px)`;
+            goldSection.style.transform = `translateY(-${scrollY * 0.3}px)`;
 
-            // 文字內容
+            // 調整文字移動速度，使其比背景移動快
             textContents.forEach((content, index) => {
-                content.style.transform = `translate(-50%, ${scrollY * 0.3}px)`;
+                content.style.transform = `translate(-50%, -${50 + scrollY * (0.5 * (index + 1))}%)`;
             });
+        }
 
-            // 處理導航欄效果
+        // 導航欄效果
+        function handleNavbar() {
             const navbar = document.querySelector('.navbar');
-            if (scrollY > 50) {
-                navbar.classList.add('navbar-shrink');
-            } else {
-                navbar.classList.remove('navbar-shrink');
-            }
+            let lastScrollTop = 0;
+
+            window.addEventListener('wheel', function() {
+                e.preventDefault();
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > lastScrollTop) {
+                    navbar.style.transform = 'translateY(-100%)';
+                    navbar.classList.add('navbar-shrink');
+                } else {
+                    navbar.style.transform = 'translateY(0)';
+                    if (scrollTop <= 60) {
+                        navbar.classList.remove('navbar-shrink');
+                    }
+                }
+                lastScrollTop = scrollTop;
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             initThree();
             animatePyramid();
-
-            // 添加滾動事件監聽器
-            window.addEventListener('scroll', handleScroll);
-
-            // 初始調用一次以設置初始狀態
-            handleScroll();
+            handleNavbar();
+            window.addEventListener('wheel', handleScroll);
         });
     </script>
 </body>

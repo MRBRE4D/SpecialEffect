@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全屏背景與中央色彩區塊模板</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --navbar-height: 60px;
+            --main-color: #3498db;
+            --text-color: #ffffff;
+            --background-color: #ccc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+
+
+        .navbar {
+            height: var(--navbar-height);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-shrink {
+            height: calc(var(--navbar-height) * 0.8);
+        }
+
+        .navbar-brand img {
+            height: calc(var(--navbar-height) * 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-shrink .navbar-brand img {
+            height: calc(var(--navbar-height) * 0.5);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .wind-section {
+            background: linear-gradient(225deg, #ffabab, #ffdaab, #ddffab, #abe4ff, #d9abff);
+            background-size: 300% 300%;
+            box-sizing: border-box;
+            display: table;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+            width: 100vw;
+            -webkit-animation: Rainbow 25s ease infinite;
+            -moz-animation: Rainbow 25s ease infinite;
+            animation: Rainbow 25s ease infinite;
+          }
+          
+        .color-block {
+            width: 2em;
+            height: 2em;
+            background-color: var(--main-color);
+            position: relative;
+        }
+
+
+        .text-content h1 {
+            font-size: 3rem;
+            font-weight:bold;
+            margin-bottom: 0.5rem;
+            letter-spacing: 5px;
+        }
+
+        .text-content h2 {
+            font-size: 1.5rem;
+            font-weight:bold;
+
+        }
+
+        @-webkit-keyframes Rainbow {
+            0% {
+              background-position: 94% 0%; }
+            50% {
+              background-position: 7% 100%; }
+            100% {
+              background-position: 94% 0%; } }
+
+    </style>
+</head>
+<body>
+    <!-- 固定頂部導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <!-- 左側 Logo -->
+            <a class="navbar-brand" href="#"><img src="asset\logo\LOGO.png" alt="Logo" style="min-width:4rem;min-height:4rem" /></a>
+            
+            <!-- 右側漢堡菜單 -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- 折疊菜單內容 -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#">首頁</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">關於我們</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">服務</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">聯繫我們</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容區 -->
+    <main class="main-content">
+        <section class="wind-section">
+            <div class="color-block"></div>
+            <div class="position-absolute" style="top:30%;left:25%">
+                <div class="text-content text-center text-light">
+                    <h1>美容革命</h1>
+                    <h2>成為，最好的你</h2>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bootstrap 5 JS Bundle CDN (包含 Popper) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 自定義 JavaScript 用於導航欄效果 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var navbar = document.querySelector('.navbar');
+            var lastScrollTop = 0;
+            
+            window.addEventListener('scroll', function() {
+                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > lastScrollTop) {
+                    // 向下滾動
+                    navbar.style.transform = 'translateY(-100%)';
+                    navbar.classList.add('navbar-shrink');
+                } else {
+                    // 向上滾動
+                    navbar.style.transform = 'translateY(0)';
+                    if (scrollTop <= 60) {
+                        navbar.classList.remove('navbar-shrink');
+                    }
+                }
+                lastScrollTop = scrollTop;
+            });
+        });
+    </script>
+</body>
+</html>
