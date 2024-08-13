@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美容革命 - 3D效果與視差滾動</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --navbar-height: 60px;
+            --main-color: #3498db;
+            --text-color: #ffffff;
+            --background-color: #ccc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            height: var(--navbar-height);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .navbar-shrink {
+            height: calc(var(--navbar-height) * 0.8);
+        }
+
+        .navbar-brand img {
+            height: calc(var(--navbar-height) * 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-shrink .navbar-brand img {
+            height: calc(var(--navbar-height) * 0.5);
+        }
+
+        .main-content {
+            height: 200vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wind-section, .gold-section {
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wind-section {
+            background: linear-gradient(225deg, #ffabab, #ffdaab, #ddffab, #abe4ff, #d9abff);
+            background-size: 300% 300%;
+            animation: Rainbow 25s ease infinite;
+        }
+
+        .gold-section {
+            background: linear-gradient(225deg, #ffd700, #fff5e6, #fffacd, #ffffe0, #fafad2);
+            background-size: 300% 300%;
+            animation: Rainbow 25s ease infinite;
+        }
+
+        #pyramidCanvas {
+            position: fixed;
+            left: 50%;
+            top: 60%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .text-content {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #ffffff;
+            z-index: 20;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            will-change: transform;
+        }
+
+        .text-content h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            letter-spacing: 5px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s forwards;
+        }
+
+        .text-content h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s forwards 0.5s;
+        }
+
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            will-change: transform;
+        }
+
+        .wind-bg {
+            background-image: url('https://source.unsplash.com/random/1600x900?nature,wind');
+        }
+
+        .gold-bg {
+            background-image: url('https://source.unsplash.com/random/1600x900?gold,luxury');
+        }
+
+        @keyframes Rainbow {
+            0% { background-position: 94% 0%; }
+            50% { background-position: 7% 100%; }
+            100% { background-position: 94% 0%; }
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 固定頂部導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <!-- 左側 Logo -->
+            <a class="navbar-brand" href="#"><img src="asset\logo\LOGO.png" alt="Logo" style="min-width:4rem;min-height:4rem" /></a>
+            
+            <!-- 右側漢堡菜單 -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- 折疊菜單內容 -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#">首頁</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">關於我們</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">服務</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">聯繫我們</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容區 -->
+    <main class="main-content">
+        <section class="wind-section">
+            <div class="parallax-bg wind-bg"></div>
+            <canvas id="pyramidCanvas"></canvas>
+            <div class="text-content">
+                <h1>美容革命</h1>
+                <h2>成為，最好的你</h2>
+            </div>
+        </section>
+        <section class="gold-section">
+            <div class="parallax-bg gold-bg"></div>
+            <div class="text-content">
+                <h1>打破上限</h1>
+                <h2>讓自己美的張揚</h2>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bootstrap 5 JS Bundle CDN (包含 Popper) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 創建並初始化三角錐
+        let scene, camera, renderer, pyramid;
+
+        function initThree() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('pyramidCanvas'), alpha: true });
+            renderer.setSize(600, 600);
+
+            const geometry = new THREE.ConeGeometry(3, 6, 4);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0xFFFAFA,
+                shininess: 100,
+                specular: 0x444444
+            });
+            pyramid = new THREE.Mesh(geometry, material);
+            scene.add(pyramid);
+
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            camera.position.z = 10;
+        }
+
+        function animatePyramid() {
+            requestAnimationFrame(animatePyramid);
+            pyramid.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+
+        // 處理滾動效果
+        function handleScroll() {
+            const scrollY = window.pageYOffset;
+            const windSection = document.querySelector('.wind-section');
+            const goldSection = document.querySelector('.gold-section');
+            const textContents = document.querySelectorAll('.text-content');
+            const parallaxBgs = document.querySelectorAll('.parallax-bg');
+
+            // 視差背景
+            parallaxBgs.forEach((bg, index) => {
+                bg.style.transform = `translateY(${scrollY * 0.5}px)`;
+            });
+
+            // 文字內容
+            textContents.forEach((content, index) => {
+                content.style.transform = `translate(-50%, ${scrollY * 0.3}px)`;
+            });
+
+            // 處理導航欄效果
+            const navbar = document.querySelector('.navbar');
+            if (scrollY > 50) {
+                navbar.classList.add('navbar-shrink');
+            } else {
+                navbar.classList.remove('navbar-shrink');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initThree();
+            animatePyramid();
+
+            // 添加滾動事件監聽器
+            window.addEventListener('scroll', handleScroll);
+
+            // 初始調用一次以設置初始狀態
+            handleScroll();
+        });
+    </script>
+</body>
+</html>
